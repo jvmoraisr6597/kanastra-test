@@ -102,6 +102,13 @@ Os logs do sistem serão registrados em (`storage/logs/laravel.log`). Já os log
   ```
 
 ---
+## **Rodando os testes unitários**
+
+Para rodar os testes unitário será necessário executar o comando abaixo:
+```bash
+  docker exec -it laravel-app bash
+  ```
+---
 
 ## **Notas Finais**
 
