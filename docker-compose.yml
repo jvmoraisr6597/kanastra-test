@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Serviço PHP
+  app:
+    build:
+      context: .
+    container_name: laravel-app
+    volumes:
+      - .:/var/www
+    networks:
+      - laravel-network
+    depends_on:
+      - db
+
+  # Serviço Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-laravel
+    volumes:
+      - .:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    networks:
+      - laravel-network
+    depends_on:
+      - app
+
+  # Banco de dados MySQL
+  db:
+    image: mysql:5.7
+    container_name: mysql-laravel
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - laravel-network
+    ports:
+      - "3306:3306"
+  
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - laravel-network
+    ports:
+      - "6379:6379"
+
+  horizon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www
+    environment:
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      - redis
+    networks:
+      - laravel-network
+    command: php artisan horizon
+
+networks:
+  laravel-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
